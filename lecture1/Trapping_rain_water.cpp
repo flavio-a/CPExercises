@@ -1,7 +1,14 @@
 // https://practice.geeksforgeeks.org/problems/trapping-rain-water/0
 /*
 
-Explanation of the algorithm: TODO
+Explanation of the algorithm:
+Studying a single column at a time, the height of water in that column is the
+minimum of the right and left maximums (the maximum of elements to the
+right/left of the column). Right maximums (or suffix maximums) are computed
+before and stored in an array, then the main cycle sums the amount of water
+(0 or the difference between water height and building height) in each column.
+
+Both time and space complexity are Theta(n).
 
 */
 #include <iostream>
