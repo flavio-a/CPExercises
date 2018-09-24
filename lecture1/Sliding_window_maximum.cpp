@@ -17,8 +17,9 @@ int main(){
 
 	for (int t = 0; t < T; ++t) {
 		// Reading input
-		int N;
+		int N, k;
 		cin >> N;
+		cin >> k;
 		int A[N];
 		for (int i = 0; i < N; ++i){
 			int x;
@@ -27,19 +28,22 @@ int main(){
 		}
 
 		// Filling array of results, using the deque
-		// TODO (WIP)
 		int R[N];
-		deque<int> d;
+		deque<pair<int, int>> d;
 		for (int i = 0; i < N; ++i) {
-			while(!d.empty() && d.front() < A[i]) {
+			// Remove the first element if is out of the window
+			if (d.front().second <= i - k)
 				d.pop_front();
-			}
-			R[i] = d.empty() ? -1 : d.front();
-			d.push_front(pair<int, int>(A[i], i));
+			// Remove smaller elements from back
+			while(!d.empty() && d.back().first < A[i])
+				d.pop_back();
+			// Get the front element as maximum and add the new element
+			d.push_back(pair<int, int>(A[i], i));
+			R[i] = d.front().first;
 		}
 
-		cout << R[0];
-		for (int i = 1; i < N; ++i)
+		cout << R[k - 1];
+		for (int i = k; i < N; ++i)
 			cout << ' ' << R[i];
 		cout << '\n';
 	}
