@@ -8,41 +8,18 @@ of the two arrays with multiplication. The answer is obviously the zip of a
 permutation of those two arrays, and that is the maximum because of
 rearrangement ineq (https://en.wikipedia.org/wiki/Rearrangement_inequality).
 
-To compute efficiently the counter array it uses a Fenwick tree on the
-difference array (see update the array problem).
+The counter array is computed as in the update_the_array problem (the situation
+is the same).
 
-Space complexity is Theta(n) (the Fenwick). Tme complexity is O(q * log(n)) for
-the query phase and Theta(n log(n)) for the sorting + zipping phase.
+Space complexity is Theta(n). Time complexity is Theta(q) for the query phase,
+Theta(n) for the intermediate phase and Theta(n log(n)) for the sorting +
+zipping phase, for a total of Theta(n log(n) + q).
 
 */
 
 #include <bits/stdc++.h>
 
 using namespace std;
-
-// ================== Taken from Update the array code ======================
-#define lsb(x) (x & -x)
-
-// Returns the element at index i of the array, that is the sum from 0 to i
-// in the difference array, that is the query on the Fenwick tree
-int getVal(vector<int>& v, int i) {
-	int sum = 0;
-	while (i != 0) {
-		sum += v[i];
-		i -= lsb(i);
-	}
-	return sum;
-}
-
-// Adds x to all elements from i (included) onward, that is the edit of i in the
-// difference array, that is the update on the Fenwick tree
-void addVal(vector<int>& v, int i, int x) {
-	while (i < v.size()) {
-		v[i] += x;
-		i += lsb(i);
-	}
-}
-// ==========================================================================
 
 int main() {
 	int N, Q;
@@ -53,21 +30,24 @@ int main() {
 		cin >> a;
 		A[i] = a;
 	}
-	vector<int> ftree(N + 1, 0);
+	int diffArray[N] = {0};
+	// vector<int> ftree(N + 1, 0);
 	for (int q = 0; q < Q; ++q) {
 		int l, r;
 		cin >> l >> r;
 		// Inputs are in a 1-based array
 		--l;
 		--r;
-		addVal(ftree, l + 1, 1);
+		diffArray[l] += 1;
 		// r + 1 because r is included in te query
-		addVal(ftree, (r + 1) + 1, -1);
+		diffArray[r + 1] -= 1;
 	}
 	int M[N];
-	for (int i = 0; i < N; ++i) {
-		M[i] = getVal(ftree, i + 1);
+	M[0] = diffArray[0];
+	for (int i = 1; i < N; ++i) {
+		M[i] = M[i - 1] + diffArray[i];
 	}
+
 	sort(A, A + N);
 	sort(M, M + N);
 	int sum = 0;
