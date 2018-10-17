@@ -25,20 +25,23 @@ int main() {
 	}
 	int timeA = 0, timeB = 0;
 	int iA = 0, iB = N - 1;
-	while (iA < iB) {
+	while (iA <= iB) {
 		if (timeA <= timeB) {
+			// cout << "A eats " << T[iA] << ", number " << iA << "\n";
 			timeA += T[iA];
 			++iA;
 		}
 		else {
+			// cout << "B eats " << T[iB] << ", number " << iB << "\n";
 			timeB += T[iB];
 			--iB;
 		}
 	}
-	if (timeA == timeB) {
-		++iA;
-		++iB;
-	}
+	// if (timeA == timeB) {
+	// 	++iA;
+	// 	++iB;
+	// }
+	++iB;
 	cout << iA << " " << N - iB << endl;
 	return 0;
 }

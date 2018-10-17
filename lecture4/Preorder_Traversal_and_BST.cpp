@@ -70,7 +70,7 @@ most once for push/pop (while guards check, mostly), thus the bound of N push
 plus N pop is a time complexity bound. The space only extra space is costant
 plus the stack, that is obviusly O(n), but actually is O(h) where h is the
 height of the BST (without proof: the stack contains at any moment the keys of
-a descending path from the root to a node).
+a sorted subset of a descending path from the root to a node).
 
 */
 

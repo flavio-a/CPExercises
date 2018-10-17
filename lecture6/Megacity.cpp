@@ -21,8 +21,13 @@ struct custom_less {
 #define population 1000000
 
 int main() {
+    cout.precision(10);
 	int N, s;
 	cin >> N >> s;
+    if (s >= population) {
+        cout << 0 << endl;
+        return 0;
+    }
 	vector<pair<int, int>> cities;
 	cities.reserve(N);
 	for (int i = 0; i < N; ++i) {
@@ -33,12 +38,12 @@ int main() {
 	sort(cities.begin(), cities.end(), custom_less());
 	int distance = 0;
 	for (int i = 0; i < N; ++i) {
+        distance = cities[i].first;
+        s += cities[i].second;
 		if (s >= population) {
-			cout << sqrt(distance) << endl;
+			cout << sqrt((double)distance) << endl;
 			break;
 		}
-		distance = cities[i].first;
-		s += cities[i].second;
 	}
 	if (s < population)
 		cout << -1 << endl;

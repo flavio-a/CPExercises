@@ -24,7 +24,7 @@ using namespace std;
 int main() {
 	int N, Q;
 	cin >> N >> Q;
-	int A[N];
+	long long int A[N];
 	for (int i = 0; i < N; ++i) {
 		int a;
 		cin >> a;
@@ -42,7 +42,7 @@ int main() {
 		// r + 1 because r is included in te query
 		diffArray[r + 1] -= 1;
 	}
-	int M[N];
+	long long int M[N];
 	M[0] = diffArray[0];
 	for (int i = 1; i < N; ++i) {
 		M[i] = M[i - 1] + diffArray[i];
@@ -50,7 +50,7 @@ int main() {
 
 	sort(A, A + N);
 	sort(M, M + N);
-	int sum = 0;
+	long long int sum = 0;
 	for (int i = 0; i < N; ++i) {
 		sum += A[i] * M[i];
 	}
