@@ -21,15 +21,15 @@ between the two heaps. After this, the placeholders fills the space.
 using namespace std;
 
 struct dati {
-	int val;
-	int heap;
+	unsigned int val;
+	char heap;
 };
 
 int main() {
-	int N;
+	unsigned int N;
 	cin >> N;
 	dati A[2 * N] = {0};
-	int freq[100] = {0};
+	unsigned int freq[100] = {0};
 	int totrep = 0;
 	for (int i = 0; i < 2 * N; ++i) {
 		int a;
@@ -43,20 +43,20 @@ int main() {
 	int tmp = 2 * N - totrep;
 	cout << (tmp / 2) * (tmp - tmp / 2) << endl;
 
-	int heaps[2] = {N, N};
+	unsigned int heaps[2] = {0, 0};
 	// Marks placeholders updating the heaps count (the actual insertion is in
 	// the next cycle)
 	bool added[100] = {false};
 	for (int i = 0; i < 2 * N; ++i) {
 		if (freq[A[i].val] > 1 && !added[A[i].val]) {
+			heaps[0] += freq[A[i].val] / 2;
+			heaps[1] += freq[A[i].val] / 2;
+			added[A[i].val] = true;
+			freq[A[i].val] += 2; // To split more easily
 			if (freq[A[i].val] % 2 == 1) {
 				--freq[A[i].val];
 				A[i].val += 100;
 			}
-			heaps[0] -= freq[A[i].val] / 2;
-			heaps[1] -= freq[A[i].val] / 2;
-			added[A[i].val] = true;
-			freq[A[i].val] += 2; // To split more easily
 		}
 	}
 
@@ -73,13 +73,13 @@ int main() {
 		}
 		else {
 			// Non-placeholder
-			if (heaps[0] < heaps[1]) {
+			if (heaps[0] > heaps[1]) {
 				A[i].heap = 1;
-				--heaps[1];
+				++heaps[1];
 			}
 			else {
 				A[i].heap = 0;
-				--heaps[0];
+				++heaps[0];
 			}
 		}
 	}
@@ -88,9 +88,9 @@ int main() {
 	for (int i = 0; i < 2 * N; ++i) {
 		if (A[i].val >= 100) {
 			// Placeholder
-			if (heaps[0] > 0) {
+			if (heaps[0] < N) {
 				cout << 1 << " ";
-				--heaps[0];
+				++heaps[0];
 			}
 			else
 				cout << 2 << " ";
