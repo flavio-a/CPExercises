@@ -1,5 +1,4 @@
 // http://codeforces.com/problemset/problem/52/C
-// TODO
 /*
 
 Plain implementation of segment tree. Queries that wrap are handled as two
