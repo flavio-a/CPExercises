@@ -20,7 +20,7 @@ int main() {
 	int n;
 	cin >> n;
 	int A[n];
-	int sum = 0;
+	long long int sum = 0;
 	for (int i = 0; i < n; ++i) {
 		int a;
 		cin >> a;
@@ -31,20 +31,22 @@ int main() {
 		cout << 0 << endl;
 		return 0;
 	}
-	int thirdsum = sum / 3;
+	long long int thirdsum = sum / 3;
 	// Fills the prefix
 	int prefs[n] = {0};
-	int prefixsum = 0;
-	for (int i = 0; i < n; ++i) {
+	long long int prefixsum = A[0];
+	if (prefixsum == thirdsum)
+		prefs[0]++;
+	for (int i = 1; i < n; ++i) {
 		prefixsum += A[i];
 		prefs[i] = prefs[i - 1];
 		if (prefixsum == thirdsum)
 			prefs[i]++;
 	}
 
-	int result = 0;
-	int suffixsum = 0;
-	for (int i = n - 1; i >= 0; --i) {
+	long long int result = 0;
+	long long int suffixsum = 0;
+	for (int i = n - 1; i >= 2; --i) {
 		suffixsum += A[i];
 		if (suffixsum == thirdsum)
 			result += prefs[i - 2];
