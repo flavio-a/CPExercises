@@ -101,8 +101,8 @@ int main() {
 			int x, y, k;
 			cin >> x >> y >> k;
 			// cout << "Copy " << x << " "  << y << " " << k << endl;
-			// cout << "Update [" << y << " " << min(y + k + 1, N) << ")\n";
-			update(sgtree, 1, 0, N, y, min(y + k + 1, N), x - y);
+			// cout << "Update [" << y << " " << min(y + k, N) << ")\n";
+			update(sgtree, 1, 0, N, y, min(y + k, N), x - y);
 		}
 		else { // kind == 2
 			int i;
