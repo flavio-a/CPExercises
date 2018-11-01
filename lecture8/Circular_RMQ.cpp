@@ -1,9 +1,8 @@
 // http://codeforces.com/problemset/problem/52/C
-// TOFIX
 /*
 
-Plain implementation of segment tree. Queries that wrap are handled as two
-different queries.
+Plain implementation of segment tree with lazy updates. Queries that wrap are
+handled as two different queries.
 
 */
 
@@ -11,45 +10,84 @@ different queries.
 
 using namespace std;
 
-int updateSgtree(vector<int> &sgtree, int root, int l, int r, int start, int end, int val) {
-	if (l < end && start < r) {
+typedef struct {
+	int min;
+	int update;
+} minupdate;
+
+int updateSgtree(vector<minupdate> &sgtree, int root, int l, int r, int start, int end, int val) {
+	// self lazy update
+	if (sgtree[root].update != 0) {
+		// cout << "Lazy update of [" << l << "; " << r << "): " << sgtree[root].update << " changes " << sgtree[root].min <<"\n";
+		if (l < r - 1) {
+			// non-leaf
+			sgtree[2 * root].update += sgtree[root].update;
+			sgtree[2 * root + 1].update += sgtree[root].update;
+		}
+		sgtree[root].min += sgtree[root].update;
+		sgtree[root].update = 0;
+	}
+	if (start <= l && r <= end) {
+		// Contained
+		// cout << "Change [" << l << "; " << r << "): " << val <<"\n";
+		if (l < r - 1) {
+			// non-leaf
+			sgtree[2 * root].update += val;
+			sgtree[2 * root + 1].update += val;
+		}
+		return sgtree[root].min += val;
+	}
+	else if (end <= l || r <= start) {
+		// disjoint
+		// cout << "Returning [" << l << "; " << r << "): " << sgtree[root].min <<"\n";
+		return sgtree[root].min;
+	}
+	else {
 		// intersect
 		if (l < r - 1) {
 			int mid = (l + r) / 2;
 			int leftmin = updateSgtree(sgtree, 2 * root, l, mid, start, end, val);
 			int rightmin = updateSgtree(sgtree, 2 * root + 1, mid, r, start, end, val);
-			// cout << "Update from bottom at " << root << ": " << min(leftmin, rightmin) <<"\n";
-			return sgtree[root] = min(leftmin, rightmin);
+			// cout << "Update from bottom at [" << l << "; " << r << "): " << min(leftmin, rightmin) <<"\n";
+			return sgtree[root].min = min(leftmin, rightmin);
 		}
 		else {
-			// cout << "Change at index " << root << ", that is " << l << ": " << val <<"\n";
-			return sgtree[root] += val;
+			// leaf
+			// cout << "Change [" << l << "; " << r << "): " << val <<"\n";
+			return sgtree[root].min += val;
 		}
 	}
-	else
-		return sgtree[root];
 }
 
-int querySgtree(const vector<int> &sgtree, int root, int l, int r, int start, int end) {
+int querySgtree(vector<minupdate> &sgtree, int root, int l, int r, int start, int end) {
+	// self lazy update
+	if (sgtree[root].update != 0) {
+		if (l < r - 1) {
+			// non-leaf
+			sgtree[2 * root].update += sgtree[root].update;
+			sgtree[2 * root + 1].update += sgtree[root].update;
+		}
+		sgtree[root].min += sgtree[root].update;
+		sgtree[root].update = 0;
+	}
 	if (start <= l && r <= end) {
 		// node contained in [start; end)
-		// cout << l << "; " << r << " contained in " << start << "; " << end << "\n";
-		return sgtree[root];
+		return sgtree[root].min;
 	}
 	else if (r <= start || l >= end) {
 		// node disjoint from [start; end)
-		// cout << l << "; " << r << " disjoint from " << start << "; " << end << "\n";
 		return INT_MAX;
 	}
 	else if (l < r - 1) {
-		// cout << l << "; " << r << " intersect with " << start << "; " << end << "\n";
+		// nonleaf
 		int mid = (l + r) / 2;
 		int leftmin = querySgtree(sgtree, 2 * root, l, mid, start, end);
 		int rightmin = querySgtree(sgtree, 2 * root + 1, mid, r, start, end);
 		return min(leftmin, rightmin);
 	}
 	else {
-		return sgtree[root];
+		// leaf
+		return sgtree[root].min;
 	}
 }
 
@@ -57,21 +95,17 @@ int main() {
 	int N;
 	cin >> N;
 	int A[N];
-	vector<int> seg_tree;
-	seg_tree.resize(2 * N + 1, 0);
+	vector<minupdate> seg_tree;
+	// I'm pretty sure there's a better size limit for the segment tree, but
+	// this is working. Maybe I'll fix later
+	// IMPROVE
+	seg_tree.resize(8 * N, (minupdate){0, 0});
 	for (int i = 0; i < N; ++i) {
 		cin >> A[i];
 		updateSgtree(seg_tree, 1, 0, N, i, i + 1, A[i]);
 	}
-	// updateSgtree(seg_tree, 1, 0, N, 2, 100);
-	// for (int i = 1; i < 2 * N + 1; ++i) {
-	// 	cout << i << ": " << seg_tree[i] << "\n";
-	// }
-
-	// cout << querySgtree(seg_tree, 1, 0, N, 1, 2) << endl;
-	// cout << querySgtree(seg_tree, 1, 0, N, 0, 1) << endl;
-	// cout << querySgtree(seg_tree, 1, 0, N, 1, 4) << endl;
-	// cout << querySgtree(seg_tree, 1, 0, N, 3, 4) << endl;
+	// for (int i = 1; i < 2 * N; ++i)
+		// cout << i << ": " << seg_tree[i].min << " " << seg_tree[i].update << "\n";
 
 	int m;
 	cin >> m;
@@ -87,7 +121,6 @@ int main() {
 		line.erase(0, line.find(' ') + 1);
 		if (line.find(' ') == string::npos) {
 			rg = stoi(line) + 1;
-			// cout << lf << " " << rg << endl;
 			// Query
 			if (lf >= rg) {
 				// Wrap
@@ -102,18 +135,20 @@ int main() {
 			rg = stoi(line.substr(0, line.find(' '))) + 1;
 			line.erase(0, line.find(' ') + 1);
 			v = stoi(line);
-			// cout << lf << " " << rg << " " << v << endl;
 			if (lf >= rg) {
 				// Wrap
 				updateSgtree(seg_tree, 1, 0, N, lf, N, v);
+				// for (int i = 1; i < 2 * N; ++i)
+				// 	cout << i << ": " << seg_tree[i].min << " " << seg_tree[i].update << "\n";
 				updateSgtree(seg_tree, 1, 0, N, 0, rg, v);
+				// for (int i = 1; i < 2 * N; ++i)
+				// 	cout << i << ": " << seg_tree[i].min << " " << seg_tree[i].update << "\n";
 			}
 			else {
 				updateSgtree(seg_tree, 1, 0, N, lf, rg, v);
+				// for (int i = 1; i < 2 * N; ++i)
+				// 	cout << i << ": " << seg_tree[i].min << " " << seg_tree[i].update << "\n";
 			}
-			// for (int i = 1; i < 2 * N + 1; ++i) {
-			// 	cout << i << ": " << seg_tree[i] << "\n";
-			// }
 		}
 	}
 

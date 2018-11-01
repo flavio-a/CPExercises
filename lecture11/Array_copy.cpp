@@ -1,5 +1,4 @@
 // https://practice.geeksforgeeks.org/problems/missing-number-in-array/0
-// TODO
 /*
 
 The array B is never modified, and update operations are stored in a segment
