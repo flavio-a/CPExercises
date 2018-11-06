@@ -1,5 +1,4 @@
 // http://codeforces.com/contest/86/problem/D
-// TODO
 /*
 
 Mo's algorithm.
@@ -20,10 +19,25 @@ int main() {
 	long long int A[N];
 	for (int i = 0; i < N; ++i)
 		cin >> A[i];
+	// Remap A elements to 0..N - 1 in order to use an array instead of an
+	// hashmap to keep the number of occurrences
+	unordered_map<int, int> valToIndexes;
+	valToIndexes.reserve(N);
+	int Aindexes[N];
+	int idx = 0;
+	for (int i = 0; i < N; ++i) {
+		if (valToIndexes.find(A[i]) == valToIndexes.end()) {
+			valToIndexes[A[i]] = idx;
+			++idx;
+		}
+		Aindexes[i] = valToIndexes[A[i]];
+	}
+
+	// Buckets division
 	int sqrtN = ceil(sqrt(N));
 	pair<int, int> queries[T];
-	int indexes[T];
-	iota(indexes, indexes + T, 0);
+	int Qindexes[T];
+	iota(Qindexes, Qindexes + T, 0);
 	for (int t = 0; t < T; ++t) {
 		int l, r;
 		cin >> l >> r;
@@ -31,7 +45,7 @@ int main() {
 		queries[t] = pair<int, int>(l - 1, r - 1);
 	}
 	// Sort queries sorted by (bucket; end)
-	sort(indexes, indexes + T, [sqrtN, N, &queries](int i1, int i2) {
+	sort(Qindexes, Qindexes + T, [sqrtN, N, &queries](int i1, int i2) {
 		auto p1 = queries[i1], p2 = queries[i2];
 		if (p1.first / sqrtN == p2.first / sqrtN)
 			return p1.second < p2.second;
@@ -40,14 +54,10 @@ int main() {
 		return p1.first < p2.first;
 	});
 
+
 	// To apply Mo's algorithm, I need to keep track of how many occurences of
 	// s are in the subarray
-	unordered_map<int, int> occurrences;
-	occurrences.reserve(N);
-	// At some point each value of the array will be an index of the hashtable
-	// To avoid checks after, let's initialize it now
-	for (int i = 0; i < N; ++i)
-		occurrences[A[i]] = 0;
+	int occurrences[N] = {0};
 
 	// Consider subarray A[l, r], ends included
 	int l = 0, r = -1;
@@ -55,39 +65,33 @@ int main() {
 	long long int arraypow = 0;
 	long long int results[T];
 	for (int t = 0; t < T; ++t) {
-		// cout << "Query " << indexes[t] << " [" << queries[indexes[t]].first << ", " << queries[indexes[t]].second << "]: ";
-		while (r > queries[indexes[t]].second) {
-			auto counter = occurrences.find(A[r]);
-			arraypow += deltaPower((*counter).second, A[r], -1);
-			--(*counter).second;
-			--r;
+		if (r > queries[Qindexes[t]].second) {
+			// Finished bucket, resetting
+			l = queries[Qindexes[t]].first;
+			r = l - 1;
+			arraypow = 0;
+			for (int i = 0; i < N; ++i)
+				occurrences[i] = 0;
 		}
-		// cout << "r- ";
 
-		while (r < queries[indexes[t]].second) {
+		while (r < queries[Qindexes[t]].second) {
 			++r;
-			auto counter = occurrences.find(A[r]);
-			arraypow += deltaPower((*counter).second, A[r], +1);
-			++(*counter).second;
+			arraypow += deltaPower(occurrences[Aindexes[r]], A[r], +1);
+			++(occurrences[Aindexes[r]]);
 		}
-		// cout << "r+ ";
 
-		while (l > queries[indexes[t]].first) {
+		while (l > queries[Qindexes[t]].first) {
 			--l;
-			auto counter = occurrences.find(A[l]);
-			arraypow += deltaPower((*counter).second, A[l], +1);
-			++(*counter).second;
+			arraypow += deltaPower(occurrences[Aindexes[l]], A[l], +1);
+			++(occurrences[Aindexes[l]]);
 		}
-		// cout << "l- ";
 
-		while (l < queries[indexes[t]].first) {
-			auto counter = occurrences.find(A[l]);
-			arraypow += deltaPower((*counter).second, A[l], -1);
-			--(*counter).second;
+		while (l < queries[Qindexes[t]].first) {
+			arraypow += deltaPower(occurrences[Aindexes[l]], A[l], -1);
+			--(occurrences[Aindexes[l]]);
 			++l;
 		}
-		// cout << "l+\n";
-		results[indexes[t]] = arraypow;
+		results[Qindexes[t]] = arraypow;
 	}
 
 	for (int t = 0; t < T; ++t)
