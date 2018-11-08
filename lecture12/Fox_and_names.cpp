@@ -1,5 +1,4 @@
 // http://codeforces.com/problemset/problem/510/C?locale=en
-// TODO
 /*
 
 From the list of names compute a graph as follows: each vertex represents a
@@ -54,9 +53,15 @@ int main() {
 		int j = 0;
 		while (j < words[i - 1].length() && j < words[i].length() && words[i - 1][j] == words[i][j])
 			++j;
-		if (j < words[i - 1].length() && j < words[i].length())
+		if (j < words[i - 1].length()) {
+			if (j == words[i].length()) {
+				// words[i] is a prefix of words[i - 1], Impossible
+				cout << "Impossible" << endl;
+				return 0;
+			}
 			// Add words[i - 1][j] -> words[i][j]
 			G[num(words[i - 1][j])][num(words[i][j])] = true;
+		}
 	}
 
 	stack<char> order;
