@@ -1,8 +1,11 @@
 // https://practice.geeksforgeeks.org/problems/bipartite-graph/1
-// TODO
 /*
 
+Assign an arbitrary color to a vertex and proceeds assigning the other color to
+its neighbours and so on. If the graph is bipartite this is possible, if it is
+not then there exists an odd cycle and this assignement fails.
 
+The algorithm is a DFS, so time and space complexity are O(V + E).
 
 */
 

@@ -1,5 +1,4 @@
 // https://codeforces.com/problemset/problem/141/C?locale=en
-// TODO
 /*
 
 Let h[i] be the height of the i-th person, and a[i] be the number of person i
@@ -14,14 +13,21 @@ OSS2: if a[j] == a[i] and j < i, then h[j] < h[i]. Otherwise we would have
 (h[i] != h[j]) a[j] < a[i] == a[j] (by OSS1), absurd. Thus groups of people with
 the same a[i] have sorted height.
 
-When i have a set of elements of a[i] = V i reserve V space before them and
-place them. To fill this V spaces I use in decreasing order of a[i] as many
-elements as possible, always keeping a[i] places before them. Any extra element
-is placed after the used spaces.
+The algorithm proceeds as follows: takes all elements with minimum a[i] = V not
+yet placed and put them in the queue, starting at position V and going right,
+skipping positions already occupied. It also assigns heights in ascending order
+starting from the value that follows the maximum already in the queue. Repeats
+this for any V.
 
-
-
-
+The algorithm ensures that if j is before i in the queue than a[j] <= a[i], and
+that a[j] == a[i] iff h[j] < h[i], so a[i] is the number of people j before i in
+the queue with a[j] < a[i].
+Let's suppose this algorithm doesn't find a correct solution. This means that in
+the queue there is a person (with index i in array a) such that there aren't
+a[i] people with a[j] < a[i] in the array of people. But from OSS1 this means
+there's no solution at all.
+Viceversa, if this algorithm ends it find a correct solution because it puts
+exactly a[i] people with a[j] < a[i] before people i.
 
 Space complexity is Theta(N) to store the results array. Time complexity is
 O(N ^ 2): the main while is executed at most N times, and inside it there are
@@ -73,9 +79,9 @@ int main() {
 		int V = people[i].first;
 		int j = i;
 		while (people[j].first == V && j >= 0) --j;
-		// Insert persons with a[k] = V
+		// Insert people with a[k] = V
 		// Index of the first space in result in which a new person may be put,
-		// will be moved while adding persons
+		// will be moved while adding people
 		int freeIdx = V;
 		for (int k = j + 1; k < i + 1; ++k) {
 			while (result[freeIdx].second != 0 && freeIdx < N) ++freeIdx;

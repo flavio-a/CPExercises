@@ -1,24 +1,35 @@
 // https://practice.geeksforgeeks.org/problems/minimum-number-of-jumps/0
-// TODO
 /*
 
-DP algorithm: the solution for position i is 1 + the minimum of the solutions in
-i + 1, i + 2, ..., i + A[i].
+DP algorithm: computes the solution for each position in the array up to N.
+The solution R[i] for i is 1 + the minimum of R[j] for j < i and i - j <= a[j],
+or 1 if no such j exists.
+
+To improve this algorithm, let's use the following obsevation: fixed i, for any
+j > i it holds R[j] >= R[i]. By absurd, let j be the minimum index > i with
+R[j] < R[i]. By construction there must exixst a k < j with a[k] >= j - k and
+R[k] = R[j] - 1 < R[i]. Given that j is the minimum index greater than i with
+this property, it follows that k < i, thus R[i] <= 1 + R[k] = R[j] < R[i].
+
+By this observation follows that the array is sorted, thus is formed by blocks
+of consecutive elements with the same R. Let's consider the block of elements
+with R[i] = V, and let's say is the interval [n; m]. Than the right end of the
+block of R[i] = V + 1 must be <= than the maximum of i + a[i] where i iterates
+over [n; m] because each element in that block must be reachable from an element
+of the block V. Of course this upper bound is reached because from the index
+that maximizes that quantity it is possible to reach any element in the range
+[m + 1; i + a[i]].
+
+To compute this is enough to traverse each block setting R[i] = V for that block
+and keeping track of the maximum of i + a[i]; once the block is over increment V
+and restart. Actually there's no need to store the full array R, it's enough to
+store V.
 
 */
 
 #include <bits/stdc++.h>
 
 using namespace std;
-
-int getmin(int dp[], int N, int i, int Ai) {
-	int upbound = min(N, i + Ai) + 1;
-	int res = dp[i + 1];
-	for (int j = i + 2; j < upbound; ++j) {
-		res = min(res, dp[j]);
-	}
-	return res;
-}
 
 int main() {
 	int T;
@@ -30,14 +41,18 @@ int main() {
 		for (int i = 0; i < N; ++i) {
 			cin >> A[i];
 		}
-		int dp[N + 1];
-		dp[N] = 0;
-		for (int i = N - 1; i >= 0; --i) {
-			dp[i] = 1 + getmin(dp, N, i, A[i]);
+		int maxindex = A[0], i = 1, jumpnumber = 0;
+		while (i < N) {
+			++jumpnumber;
+			int newmax = maxindex;
+			for (; i <= maxindex; ++i) {
+				if (newmax < i + A[i]) {
+					newmax = i + A[i];
+				}
+			}
+			maxindex = min(N, newmax);
 		}
-		// for (int i = 0; i < N; ++i)
-		// 	cout << dp[i] << " ";
-		cout << dp[0] << endl;
+		cout << jumpnumber << endl;
 	}
 	return 0;
 }
