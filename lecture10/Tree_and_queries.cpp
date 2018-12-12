@@ -12,13 +12,14 @@ using namespace std;
 
 #define maxC 100001
 
-int linearize(vector<vector<int>> &G, int root, const vector<int> &colors, int idx, vector<int> &start, vector<int> &end, vector<int> &newcolors) {
+int linearize(vector<vector<int>> &G, int root, int parent, const vector<int> &colors, int idx, vector<int> &start, vector<int> &end, vector<int> &newcolors) {
 	start[root] = idx;
 	newcolors[idx] = colors[root];
 	++idx;
-	for (auto v : G[root]) {
-		G[v].erase(find(G[v].begin(), G[v].end(), root));
-		idx = linearize(G, v, colors, idx, start, end, newcolors);
+	for (int v : G[root]) {
+		if (v != parent) {
+			idx = linearize(G, v, root, colors, idx, start, end, newcolors);
+		}
 	}
 	end[root] = idx;
 	return idx;
@@ -42,7 +43,7 @@ int main() {
 		G[b].push_back(a);
 	}
 	vector<int> start(N), end(N), newcolors(N);
-	linearize(G, 0, colors, 0, start, end, newcolors);
+	linearize(G, 0, -1, colors, 0, start, end, newcolors);
 
 	// for (int i = 0; i < N; ++i) {
 	// 	cout << "Node " << i << ": [" << start[i] << "; " << end[i] << "), color " << newcolors[i] << "\n";
@@ -54,14 +55,12 @@ int main() {
 		--v[j];
 		qidx[j] = j;
 	}
-	const int sqrtM = floor(sqrt(M));
+	const int sqrtN = floor(sqrt(N));
 	sort(qidx.begin(), qidx.end(), [&](int a, int b) {
-		if (start[a] / sqrtM != start[b] / sqrtM) {
-			return start[a] / sqrtM < start[b] / sqrtM;
+		if (start[a] / sqrtN != start[b] / sqrtN) {
+			return start[a] / sqrtN < start[b] / sqrtN;
 		}
-		else {
-			return end[a] < end[b];
-		}
+		return end[a] < end[b];
 	});
 
 	vector<int> results(M);
