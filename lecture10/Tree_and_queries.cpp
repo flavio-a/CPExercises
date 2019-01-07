@@ -1,8 +1,13 @@
 // http://codeforces.com/contest/375/problem/D
-// TODO
 /*
 
-Easy (with respect to the N * log N one) solution with Mo's algorithm.
+First I linearize the tree with a preorder visit, so that subtrees goes into
+subarrays. This way a query on a subtree becomes a query on a subarray, and I
+can use Mo's algorithm.
+
+Space complexity is Theta(N + M + maxC) where maxC is the maximum number of
+possible colors for many support arrays. Time complexity is O((N + M) * sqrt(N))
+because it's Mo's algorithm with constant add and remove.
 
 */
 
@@ -26,6 +31,8 @@ int linearize(vector<vector<int>> &G, int root, int parent, const vector<int> &c
 }
 
 int main() {
+	ios_base::sync_with_stdio(false);
+
 	int N, M;
 	cin >> N >> M;
 	vector<int> colors(N);
@@ -45,26 +52,20 @@ int main() {
 	vector<int> start(N), end(N), newcolors(N);
 	linearize(G, 0, -1, colors, 0, start, end, newcolors);
 
-	// for (int i = 0; i < N; ++i) {
-	// 	cout << "Node " << i << ": [" << start[i] << "; " << end[i] << "), color " << newcolors[i] << "\n";
-	// }
-
 	vector<int> v(M), k(M), qidx(M);
 	for (int j = 0; j < M; ++j) {
 		cin >> v[j] >> k[j];
 		--v[j];
 		qidx[j] = j;
 	}
-	const int sqrtN = floor(sqrt(N));
-	sort(qidx.begin(), qidx.end(), [&](int a, int b) {
-		if (start[a] / sqrtN != start[b] / sqrtN) {
-			return start[a] / sqrtN < start[b] / sqrtN;
+	const int sqrtN = sqrt(N);
+	sort(qidx.begin(), qidx.end(), [&start, &end, &v, &sqrtN](int a, int b) {
+		if (start[v[a]] / sqrtN != start[v[b]] / sqrtN) {
+			return start[v[a]] / sqrtN < start[v[b]] / sqrtN;
 		}
-		return end[a] < end[b];
+		return end[v[a]] < end[v[b]];
 	});
 
-	vector<int> results(M);
-	int s = 0, e = 0;
 	vector<int> totfreq(maxC, 0), col2freq(maxC, 0);
 	auto add = [&totfreq, &col2freq](int c){
 		++col2freq[c];
@@ -74,6 +75,8 @@ int main() {
 		--totfreq[col2freq[c]];
 		--col2freq[c];
 	};
+	vector<int> results(M);
+	int s = 0, e = 0;
 	for (int j = 0; j < M; ++j) {
 		// query qidx[j]
 		int sIdx = qidx[j];
@@ -93,10 +96,6 @@ int main() {
 			--e;
 			rem(newcolors[e]);
 		}
-		// cout << "Query " << sIdx << ": [" << s << "; " << e << ")\n";
-		// for (int i = 1; i < 4; ++i) {
-		// 	cout << "col2freq[" << i << "] = " << col2freq[i] << "\n";
-		// }
 		results[sIdx] = totfreq[k[sIdx]];
 	}
 
